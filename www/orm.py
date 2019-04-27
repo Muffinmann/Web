@@ -25,20 +25,6 @@ async def create_pool(loop, **kw): # offer database connection for http request
 		loop = loop
 		)
 
-async def select(sql, args, size=None):
-	log(sql, args)
-	global __pool
-	async with __pool.acquire() as conn:
-		cur = await conn.cursor(aiomysql.DictCursor)
-		await cur.execute(sql.replace('?','%s'),args or ())
-		if size: 
-			rs = await cur.fetchmany(size)
-		else:
-			rs = await cur.fetchall() # list of dicts
-		await cur.close()
-		logging.info(f'rows returned:{len(rs)}')
-		return rs 
-
 # Basic Work Flow of Mysql
 # 1. Connect to db: 
 # conn = await aiomysql.connect(host,port,user...) 
@@ -55,6 +41,20 @@ async def select(sql, args, size=None):
 # cursor.execute(insert_stmt, data)
 # ------
 # 4. close connection
+
+async def select(sql, args, size=None):
+	log(sql, args)
+	global __pool
+	async with __pool.acquire() as conn:
+		cur = await conn.cursor(aiomysql.DictCursor)
+		await cur.execute(sql.replace('?','%s'),args or ())
+		if size: 
+			rs = await cur.fetchmany(size)
+		else:
+			rs = await cur.fetchall() # list of dicts
+		await cur.close()
+		logging.info(f'rows returned:{len(rs)}')
+		return rs 
 
 async def execute(sql,args):
 	log(sql)
