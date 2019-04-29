@@ -9,12 +9,12 @@
 	5. in case of *POST* request, user data will be included in ***Body***
 
 	> FORMAT:  
-	GET /path HTTP/1.1
-	Header1: Value1
-	Header2: Value2
-	Header3: Value3
-	\r\n\r\n
-	***Body data*** (only for *POST* method)
+	GET /path HTTP/1.1  
+	Header1: Value1  
+	Header2: Value2  
+	Header3: Value3  
+	\r\n\r\n  
+	***Body data*** (only for *POST* method)  
 
 2. HTTP response:
 	1. RESPONSE CODE: *200* means successful response; *3xx* means redirect; *4xx* means erro occured in ***Client***; *5xx* means error occured in ***Server***
@@ -23,12 +23,12 @@
 	4. usually the response of a server has a ***Body***
 
 	>FORMAT:
-	200 OK
-	Header1: Value1
-	Header2: Value2
-	Header3: Value3
-	\r\n\r\n
-	***Body data***
+	200 OK  
+	Header1: Value1  
+	Header2: Value2  
+	Header3: Value3  
+	\r\n\r\n  
+	***Body data***  
 
 3. If Broser requests for other resources, repeat step 1&2
 
