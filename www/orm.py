@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# __author__ = "GL Z"
+
 
 import logging;logging.basicConfig(level=logging.INFO)
 import asyncio, aiomysql
