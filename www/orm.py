@@ -25,46 +25,36 @@ async def create_pool(loop, **kw): # offer database connection for http request
 		loop = loop
 		)
 
-# Basic Work Flow of Mysql
-# 1. Connect to db: 
-# conn = await aiomysql.connect(host,port,user...) 
-# OR async with pool.acquire() as conn
-# 2. create Cursor based on the Connection
-# 3. use cursor.execute('sql') to operate sql command:
-# cursor.execute(operation, params=None, multi=False)
-# ------
-# insert_stmt = (
-# "INSERT INTO employees (emp_no, first_name, last_name, hire_date) "
-# "VALUES (%s, %s, %s, %s)"
-# )
-# data = (2, 'Jane', 'Doe', datetime.date(2012, 3, 23))
-# cursor.execute(insert_stmt, data)
-# ------
-# 4. close connection
-
 async def select(sql, args, size=None):
 	log(sql, args)
 	global __pool
 	async with __pool.acquire() as conn:
-		cur = await conn.cursor(aiomysql.DictCursor)
-		await cur.execute(sql.replace('?','%s'),args or ())
-		if size: 
-			rs = await cur.fetchmany(size)
-		else:
-			rs = await cur.fetchall() # list of dicts
-		await cur.close()
+		async with conn.cursor(aiomysql.DictCursor) as cur:
+			await cur.execute(sql.replace('?','%s'),args or ())
+			if size: 
+				rs = await cur.fetchmany(size)
+			else:
+				rs = await cur.fetchall() # list of dicts
+			#await cur.close()
+			#conn.close()
 		logging.info(f'rows returned:{len(rs)}')
 		return rs 
 
-async def execute(sql,args):
+async def execute(sql,args,autocommit=True):
 	log(sql)
 	async with __pool.acquire() as conn:
+		if not autocommit:
+			await conn.begin()
 		try:
-			cur = await conn.cursor()
-			await cur.execute(sql.replace('?','%s'), args)
-			affected = cur.rowcount
-			await cur.close()
+			async with conn.cursor(aiomysql.DictCursor) as cur:
+				await cur.execute(sql.replace('?', '%s'), args)
+				affected = cur.rowcount
+			if not autocommit:
+				await conn.commit()
+				#conn.close()
 		except BaseException as e:
+			if not autocommit:
+				await conn.rollback()
 			raise
 		return affected
 
@@ -72,7 +62,7 @@ def create_args_string(num):
 	L = []
 	for n in range(num):
 		L.append('?')
-		return ','.join(L)
+	return ','.join(L)
 
 class Field(object):
 	def __init__(self, name, column_type, primary_key, default):
@@ -116,19 +106,19 @@ class ModelMetaclass(type):
 		# find the primary key 
 		for k, v in attrs.items():
 			if isinstance(v, Field):
-				logging.info(f'  found mapping:{k}==>{v}')
+				logging.info(f'  found mapping:{k} ==> {v}')
 				mappings[k] = v
 				if v.primary_key:
 					if primaryKey:
-						raise StandardError(f'duplicate primary key for field:{k}')
+						raise Exception(f'duplicate primary key of field:{k}')
 					primaryKey = k
 				else:
-					fields.append(k) # fields without primary keys
+					fields.append(k) 
 		if not primaryKey:
 			raise StandardError('primary key not found')
 		for k in mappings.keys():
 			attrs.pop(k) #pop out fields in attributes
-		escaped_fields = list(map(lambda f:'`%s`'%f,fields))			
+		escaped_fields = list(map(lambda f:'`%s`'%f,fields))	
 		attrs['__mappings__'] = mappings
 		attrs['__table__'] = tableName
 		attrs['__primary_key__'] = primaryKey
@@ -139,10 +129,10 @@ class ModelMetaclass(type):
 		attrs['__delete__'] = f"delete from `{tableName}` where `{primaryKey}`=?"
 		return type.__new__(cls, name, bases, attrs)
 
-class Model(dict, metaclass=ModelMetaclass):
+class Model(dict, metaclass=ModelMetaclass): # Model = Table
 
 	def __init__(self,**kw):
-		super().__init__(**kw)
+		super(Model, self).__init__(**kw)
 
 	def __getattr__(self, key):
 		try:
@@ -167,7 +157,7 @@ class Model(dict, metaclass=ModelMetaclass):
 		return value
 
 	@classmethod
-	async def finAll(cls, where=None, args=None, **kw):
+	async def findAll(cls, where=None, args=None, **kw):
 		sql = [cls.__select__]
 		if where:
 			sql.append('where')
@@ -205,7 +195,7 @@ class Model(dict, metaclass=ModelMetaclass):
 
 	@classmethod
 	async def find(cls, pk):
-		rs = await select(f'{cls.__select__} where `{cls.__primary_key__}`',[pk], 1)
+		rs = await select(f'{cls.__select__} where `{cls.__primary_key__}`=?',[pk], 1)
 		if len(rs) == 0:
 			return None
 		return cls(**rs[0])
@@ -222,6 +212,13 @@ class Model(dict, metaclass=ModelMetaclass):
 		rows = await execute(self.__delete__, args)
 		if rows != 1:
 			logging.warn(f'failed to remove primary key: affected rows: {rows}')
+
+	async def update(self):
+		args = list(map(self.getValueOrDefault,self.__fields__))
+		args.append(self.getValue(self.__primary_key__))
+		rows = await execute(self.__update__, args)
+		if rows !=1:
+			logging.warn(f'failed to update by primary key, affected rows:{rows}')
 
 
 

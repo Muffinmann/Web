@@ -42,6 +42,22 @@
 3. alter SQL operations(CRUD) into Object Methods
 4. Relation type: 1-1, 1-n, n-n; for n-n type an extra middle-table will be needed 
 
+### aiomysql work flow
+1. Connect to db
+2. create Cursor based on the Connection
+3. use ```cursor.execute(operation, params=None, multi=False)``` to operate sql command, i.e. :
+```py
+	insert_stmt = (
+	"INSERT INTO employees (emp_no, first_name, last_name, hire_date) "
+	"VALUES (%s, %s, %s, %s)"
+	)
+	data = (2, 'Jane', 'Doe', datetime.date(2012, 3, 23))
+	cursor.execute(insert_stmt, data)
+```  
+
+4. close connection
+
+
 
 
 
