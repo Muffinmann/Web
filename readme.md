@@ -32,6 +32,8 @@
 
 3. If Broser requests for other resources, repeat step 1&2
 
+4. 
+
 ### aiohttp 
 	[LINK](https://demos.aiohttp.org/en/latest/tutorial.html)
 

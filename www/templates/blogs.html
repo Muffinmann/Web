@@ -1,0 +1,49 @@
+
+{% extends '__base__.html' %}
+
+{% block title %}Article{% endblock %}
+
+{% block beforehead %}
+
+<script>
+</script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="uk-grid"></div>
+        <div class="uk-width-3-4">
+        {% for blog in blogs %}
+            <article class="uk-article">
+                <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
+                <p class="uk-article-meta">posted at {{ blog.created_at|datetime }}</p>
+                <p>{{ blog.summary }}</p>
+                <p><a href="/blog/{{ blog.id }}">display whole content<i class="uk-icon-angle-double-right"></i></a></p>
+            </article>
+            
+        {% endfor %}
+
+        </div>
+
+        <div class="uk-width-1-4">
+            <h4>Search this website</h4>
+            <form method=GET action="https://www.google.com/search">
+                <div class="uk-inline">
+                    <a class="uk-form-icon uk-form-icon-flip" href="#" uk-icon="search"></a>
+                    <input class="uk-input" type="text" name="q" placeholder="Input the content here" size=31 maxlength=255 value="">
+                </div>
+                <font size=-1>
+                    <input type="hidden" name="domains" value="#"><br>
+                    <input type="hidden" name="sitesearch" value="#"></br>
+                </font>
+            </form>
+
+            <h4>SEE ALSO</h4>
+            <ul class="uk-list uk-list-divider">
+                <li><a target="_blank" href="#">test</a></li>
+                <li><a target="_blank" href="#">link</a></li>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}

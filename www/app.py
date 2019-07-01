@@ -6,10 +6,16 @@ import os
 import json
 import time
 from datetime import datetime
+
 from aiohttp import web
 from jinja2 import Environment, FileSystemLoader
+
 import orm
 from coroweb import add_routes, add_static
+
+from handlers import cookie2user, COOKIE_NAME
+
+from config import configs
 
 def init_jinja2(app, **kw):
 	logging.info('initionalize jinja2...')
@@ -25,7 +31,7 @@ def init_jinja2(app, **kw):
 	if path is None:
 		path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'templates')
 	logging.info(f'set jinja2 template path:{path}')
-	env = Environment(loader=FileSystemLoader, **options)
+	env = Environment(loader=FileSystemLoader(path), **options)
 	filters = kw.get('filters', None)
 	if filters is not None:
 		for name, f in filters.items():
@@ -33,10 +39,25 @@ def init_jinja2(app, **kw):
 	app['__templating__'] = env
 
 async def logger_factory(app, handler):
-	async def loggerr(request):
+	async def logger(request):
 		logging.info(f'Request: {request.method} {request.path}')
 		return await handler(request)
 	return logger 
+
+async def auth_factory(app, handler):
+	async def auth(request):
+		logging.info(f'check user: {request.method} {request.path}')
+		request.__user__ = None
+		cookie_str = request.cookies.get(COOKIE_NAME)
+		if cookie_str:
+			user = await cookie2user(cookie_str)
+			if user:
+				logging.info(f'set current user: {user.email}')
+				request.__user__ = user
+		if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
+			return web.HTTPFound('/signin')
+		return await handler(request)
+	return auth
 
 async def data_factory(app, handler):
 	async def parse_data(request):
@@ -47,7 +68,7 @@ async def data_factory(app, handler):
 			elif request.content_type.startswith('application/x-www-form-urlencoded'):
 				request.__data__ = await request.post()
 				logging.info(f'request form: {str(request.__data__)}')
-			return await handler(request)
+		return await handler(request)
 	return parse_data
 
 async def response_factory(app, handler):
@@ -102,8 +123,8 @@ def datetime_filter(t):
 	return f'{dt.day},{dt.month},{dt.year}'
 
 async def init(loop):
-	await orm.create_pool(loop=loop, host='localhost', user='conner', password='_Zhang5850_', db='WebBlog')
-	app = web.Application(loop=loop, middlewares=[logger_factory, response_factory])
+	await orm.create_pool(loop=loop, **configs.db)
+	app = web.Application(loop=loop, middlewares=[logger_factory, auth_factory, response_factory])
 	init_jinja2(app, filters=dict(datetime=datetime_filter))
 	add_routes(app, 'handlers')
 	add_static(app)
@@ -113,3 +134,6 @@ async def init(loop):
 	logging.info(f'server started at http://127.0.0.1:9000...')
 	return srv
 
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init(loop))
+loop.run_forever()

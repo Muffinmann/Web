@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 
 import asyncio, os, inspect, logging, functools
-from urlib import parse
-from aitohttp import web
+from urllib import parse
+from aiohttp import web
 from apis import APIError
 
 def get(path):
@@ -21,7 +21,7 @@ def post(path):
 	def decorator(func):
 		@functools.wraps(func)
 		def wrapper(*args, **kw):
-			retrun func(*args, **kw)
+			return func(*args, **kw)
 		wrapper.__method__ = 'POST'
 		wrapper.__route__ = path
 		return wrapper
@@ -69,6 +69,7 @@ def has_request_arg(fn):
 	return found
 
 class RequestHandler(object):
+
 	def __init__(self, app, fn):
 		self._app = app
 		self._func = fn
@@ -116,49 +117,62 @@ class RequestHandler(object):
 				if k in kw:
 					logging.warning(f'Duplicate arg name in named arg and kw args: {k}')
 				kw[k] = v
-			if self._has_request_arg:
-				kw['request'] = request
-			#check required kw:
-			if self._required_kw_args:
-				for name in self._required_kw_args:
-					if not name in kw:
-						return web.HTTPBadRequest(f'Missing argument: {name}')
-			logging.info(f'call with args: {str(kw)}')
-			try:
-				r = await self._func(**kw) 
-				return r 
-			except APIError as e:
-				return dict(error=e.error, data=e.data, message=e.message)
-				
+		if self._has_request_arg:
+			kw['request'] = request
+		#check required kw:
+		if self._required_kw_args:
+			for name in self._required_kw_args:
+				if not name in kw:
+					return web.HTTPBadRequest(f'Missing argument: {name}')
+		logging.info(f'call with args: {str(kw)}')
+		try:
+			r = await self._func(**kw) # index(**kw)
+			return r 
+		except APIError as e:
+			return dict(error=e.error, data=e.data, message=e.message)
+			
 
-	def add_static(app):
-		path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
-		app.router.add_static('/static/', path)
-		logging.info(f'add static {'/static/'} => {path}')
+def add_static(app):
+	path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+	app.router.add_static('/static/', path)
+	logging.info(f"add static {'/static/'} => {path}")
 
-	def add_route(app, fn):
-		method = getattr(fn, '__method__', None)
-		path = getattr(fn, '__route__', None)
-		if path is None or method is None:
-			raise ValueError(f'@get or @post not defined in {str(fn)}')
-		if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
-			fn = asyncio.coroutine(fn)
-		logging.info(f'add route {method} {path} => {fn.__name__}({', '.join(inspect.signature(fn).parameters.keys())})')
-		app.router.add_route(method, path, RequestHandler(app, fn))
+def add_route(app, fn):
+	method = getattr(fn, '__method__', None)
+	path = getattr(fn, '__route__', None)
+	if path is None or method is None:
+		raise ValueError(f'@get or @post not defined in {str(fn)}')
+	if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
+		fn = asyncio.coroutine(fn)
+	logging.info(f"add route {method} {path} => {fn.__name__}({', '.join(inspect.signature(fn).parameters.keys())})")
+	app.router.add_route(method, path, RequestHandler(app, fn))
 
-	def add_routes(app, module_name):
-		n = module_name.rfind('.')
-		if n == (-1):
-			mod = __import__(module_name, globals(), locals())
-		else:
-			name = module_name[n+1:]
-			mod = getattr(__import__(module_name[:n], globals(), locals(), [name]), name)
-		for attr in dir(mod):
-			if attr.startswith('_'):
-				continue
-			fn = getattr(mod, attr)
-			if callable(fn):
-				method = getattr(fn, '__method__', None)
-				path = getattr(fn, '__route__', None)
-				if method and path:
-					add_route(app, fn)
+def add_routes(app, module_name):
+	"""
+	some example usage of __import__
+	import spam results in the call:
+	spam = __import__('spam', globals(), locals(), [], 0)
+
+	import spam.ham:
+	spam =  __import__('spam.ham', globals(), locals(), [], 0)
+
+	from spam.ham import eggs, sausage as saus results in:
+	_temp =  __import__('spam.ham', globals(), locals(), ['eggs', 'sausage'], 0)
+	eggs = _temp.eggs
+	saus = _temp.sausage
+	"""
+	n = module_name.rfind('.')
+	if n == (-1): # if find no '.'
+		mod = __import__(module_name, globals(), locals())
+	else: # module.name.sub
+		name = module_name[n+1:] # name = 'sub'
+		mod = getattr(__import__(module_name[:n], globals(), locals(), [name]), name)
+	for attr in dir(mod):
+		if attr.startswith('_'):
+			continue
+		fn = getattr(mod, attr)
+		if callable(fn):
+			method = getattr(fn, '__method__', None)
+			path = getattr(fn, '__route__', None)
+			if method and path:
+				add_route(app, fn)
