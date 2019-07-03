@@ -1,0 +1,68 @@
+{% extends '__base__.html'%}
+
+{% block title %} Edit Blog {% endblock %} 
+
+{% block beforehead %}
+
+<script>
+var
+	ID = '{{ID}}'
+	action = '{{ action }}'
+
+function initVM(blog){
+	var vm = new Vue({
+		el: '#vm',
+		data: blog,
+		methods: {
+			submit: function(event) {
+				event.preventDefault();
+				var $form = $('#vm').find('form');
+				$form.postJSON(action, this.$data, function(err,r) {
+					if (err) {
+						$form.showFormError(err);
+					}
+					else{
+						return location.assign('/manage/blogs')
+					}
+				});
+			}
+		}
+	});
+	$('#vm').show();
+}
+
+
+$(function () {
+    if (ID) {
+        getJSON('/api/blogs/' + ID, function (err, blog) {
+            if (err) {
+                return fatal(err);
+            }
+            $('#loading').hide();
+            initVM(blog);
+        });
+    }
+    else {
+        $('#loading').hide();
+        initVM({
+            name: '',
+            summary: '',
+            content: ''
+        });
+    }
+});
+
+</script>
+
+{% endblock %}
+
+
+{% block content %}
+<div class="uk-grid">
+<div class="uk-width-1-1 uk-margin-bottom">
+	<ul class="uk-breadcrumb">
+		<li><a href="/manage/comments">Comments</a></li>
+	</ul>
+</div>
+</div>
+{% endblock %}

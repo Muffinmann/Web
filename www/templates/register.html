@@ -1,9 +1,97 @@
 {% extends '__base__.html' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}SIGN UP{% endblock %}
 
 {% block beforehead %}
 
 <script>
-	
+
+function validateEmail(email){
+	var re = /^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$/
+	return re.test(email.toLowerCase())
+}
+
+
+$(function(){
+	var vm = new Vue({
+		el: '#vm',
+		data: {
+			name:'',
+			email:'',
+			password1:'',
+			password2:''
+		},
+		methods:{
+			submit:function(event){
+				event.preventDefault();
+				var $form = $('#vm')
+				if (! this.name.trim()){
+					return $form.showFormError('Please input the name')
+				}
+				if (! validateEmail(this.email.trim().toLowerCase())){
+					return $form.showFormError('Incorrect Email')
+				}
+				if (this.password1.length <6){
+					return $form.showFormError('Password length should at least be 6 Characters')
+				}
+				if (this.password1 !== this.password2){
+					return $form.showFormError('Two passwords incosist')
+				}
+				var email = this.email.trim().toLowerCase();
+				$form.postJSON('/api/users',{
+					name: this.name.trim(),
+					email:email,
+					passwd: CryptoJS.SHA1(email + ':' + this.password1).toString()
+				}, function(err,r){
+					if (err){
+						return $form.showFormError(err);
+					}
+					return location.assign('/')
+				});
+			}
+		}
+	});
+	$('#vm').show();
+});
 </script>
+
+{% endblock %}
+
+{% block content %}
+	<div class="uk-grid">
+	<div class="uk-width-1-1">
+		<h4>WELCOME TO SIGN UP</h4>
+		<form id="vm" v-on='submit: submit' class="uk-form-stacked">
+			<div class="uk-alert uk-alert-danger uk-hidden"></div>
+			<div class="uk-margin-top">
+				<label class="uk-form-label">NAME</label>
+				<div class="uk-form-controls">
+					<input class="uk-input uk-form-width-medium " v-model="name" type="text" maxlength="50" placeholder="your preferred user name">
+				</div>
+			</div>
+			<div class="uk-margin-top">
+				<label class="uk-form-label">EMAIL</label>
+				<div class="uk-form-controls">
+					<input class="uk-input uk-form-width-medium" v-model="email" type="text" maxlength="50" placeholder="your-name@example.com">
+				</div>
+			</div>
+			<div class="uk-margin-top">
+				<label class="uk-form-label">PASSWORD</label>
+				<div class="uk-form-controls">
+					<input class="uk-input uk-form-width-medium" v-model="password" type="text" maxlength="50" placeholder="at least 6 characters">
+				</div>
+			</div>
+			<div class="uk-margin-top">
+				<label class="uk-form-label">REPEAT PASSWORD</label>
+				<div class="uk-form-controls">
+					<input class="uk-input uk-form-width-medium" v-model="password" type="text" maxlength="50" placeholder="your password ">
+				</div>
+			</div>
+			<div class="uk-margin-large uk-margin-left">
+				<button type="submit" class="uk-button-primary uk-button-text"><i uk-icon="user"></i>SIGN UP</button>
+			</div>
+		</form>
+	</div>
+	</div>
+
+{% endblock %}

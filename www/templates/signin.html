@@ -1,0 +1,63 @@
+{% extends '__base__.html' %}
+
+{% block title %}Sigh In{% endblock %}
+
+{% block beforehead %}
+
+<script>
+$(function(){
+	var vmAuth = new Vue({
+		el:'#vm',
+		data:{
+			email:'',
+			passwd:''
+		},
+		methods: {
+			submit:function(event){
+				event.preventDefault();
+				var $form = $('#vm');
+				var email = this.email.trim().toLowerCase();
+				var data = {
+					email: email,
+					passwd: this.passwd===''?'':CryptoJS.SHA1(email + ':' + this.passwd).toString()
+				};
+				$form.postJSON('/api/authenticate', data, function(err, result){
+					if (! err){
+						location.assign('/')
+					}
+				});
+			}
+		}
+	});
+	$('vm').show();
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div uk-grid>
+<div class="uk-width-1-1">
+	<h4>WELCOMT TO SIGN IN</h4>
+	<form id="vm" v-on="submit: submit" class="uk-form-stacked">
+		<div class="uk-alert uk-alert-danger uk-hidden"></div>
+		<div class="uk-margin-top">
+			<label class="uk-form-label">EMAIL:</label>
+			<div class="uk-inline">
+				<span class="uk-form-icon" uk-icon="user"></span>
+				<input class="uk-input uk-form-width-medium" v-model="email" type="text" maxlength="50" placeholder="Your Email">
+			</div>
+		</div>
+		<div class="uk-margin-top">
+			<label class="uk-form-label">PASSWORD:</label>
+			<div class="uk-inline">
+				<span class="uk-form-icon" uk-icon="lock"></span>
+				<input class="uk-input uk-form-width-medium" v-model="email" type="text" maxlength="50" placeholder="Your Passowrd">
+			</div>
+		</div>
+		<div class="uk-margin-top uk-margin-left">
+			<button type="submit" class="uk-button-primary uk-button-text"><i uk-icon="sign-in"></i>SIGN IN</button>
+		</div>
+	</form>
+</div>
+</div>
+{% endblock %}
