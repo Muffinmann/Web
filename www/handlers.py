@@ -12,7 +12,7 @@ import asyncio
 from aiohttp import web
 
 from coroweb import get, post
-from apis import APIValueError, APIResourceNotFoundError
+from apis import APIError, APIValueError, APIResourceNotFoundError
 
 from models import User, Comment, Blog, next_id
 from config import configs
@@ -41,7 +41,7 @@ async def cookie2user(cookie_str):
 	"""
 	Parse cookie and load user if cookie is valid
 	"""
-	if not cookit_str:
+	if not cookie_str:
 		return None
 	try:
 		L = cookie_str.split('-')
@@ -136,7 +136,8 @@ async def api_register_user(*, email, name, passwd):
 		raise APIError('register:failed', 'email', 'Email is already in use.')
 	uid = next_id()
 	sha1_passwd = f'{uid}:{passwd}'
-	user = User(id=uid, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(), image=f'https://www.gravatar.com/avatar/{hashlib.md5(email.lower()).hexdigest()}?d=retro&s=120' )
+	#user = User(id=uid, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(), image=f'https://www.gravatar.com/avatar/{hashlib.md5(email.encode('utf-8')).hexdigest()}?d=retro&s=120')
+	user = User(id=uid, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(), image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
 	await user.save()
 	# make session cookie:
 	r = web.Response()
