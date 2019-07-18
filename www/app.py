@@ -40,11 +40,12 @@ def init_jinja2(app, **kw):
 
 async def logger_factory(app, handler):
 	async def logger(request):
-		logging.info(f'Request: {request.method} {request.path}')
+		logging.info(f'Request:{request.method} {request.path}')
 		return await handler(request)
 	return logger 
 
 async def auth_factory(app, handler):
+	#logging.info(f'-----Handler------->{handler}')
 	async def auth(request):
 		logging.info(f'check user: {request.method} {request.path}')
 		request.__user__ = None

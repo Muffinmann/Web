@@ -7,7 +7,7 @@
 <script>
 $(function(){
 	var vmAuth = new Vue({
-		el:'#vm',
+		el:'#vmAuth',
 		data:{
 			email:'',
 			passwd:''
@@ -15,7 +15,7 @@ $(function(){
 		methods: {
 			submit:function(event){
 				event.preventDefault();
-				var $form = $('#vm');
+				var $form = $('#vmAuth');
 				var email = this.email.trim().toLowerCase();
 				var data = {
 					email: email,
@@ -29,16 +29,16 @@ $(function(){
 			}
 		}
 	});
-	$('vm').show();
+	$('vmAuth').show();
 })
 </script>
 {% endblock %}
 
 {% block content %}
-<div uk-grid>
+<div class="uk-grid">
 <div class="uk-width-1-1">
 	<h4>WELCOME TO SIGN IN</h4>
-	<form id="vm" v-on:submit="submit" class="uk-form-stacked">
+	<form id="vmAuth" v-on:submit="submit" class="uk-form-stacked">
 		<div class="uk-alert uk-alert-danger uk-hidden"></div>
 		<div class="uk-margin-top">
 			<label class="uk-form-label">EMAIL:</label>
@@ -51,7 +51,7 @@ $(function(){
 			<label class="uk-form-label">PASSWORD:</label>
 			<div class="uk-inline">
 				<span class="uk-form-icon" uk-icon="lock"></span>
-				<input class="uk-input uk-form-width-medium" v-model="email" type="text" maxlength="50" placeholder="Your Passowrd">
+				<input class="uk-input uk-form-width-medium" v-model="passwd" type="text" maxlength="50" placeholder="Your Passowrd">
 			</div>
 		</div>
 		<div class="uk-margin-top uk-margin-left">

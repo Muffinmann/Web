@@ -218,7 +218,7 @@ function Template(tpl) {
 
 // extends jQuery.form:
 
-$(function () {// the document ready event:prevent jQ code from running before the document is finished loading
+$(function () {
     console.log('Extends $form...');
     $.fn.extend({
         showFormError: function (err) {

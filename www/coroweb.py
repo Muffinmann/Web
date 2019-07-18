@@ -28,6 +28,7 @@ def post(path):
 	return decorator
 
 def get_required_kw_args(fn):
+	"""get required key words of functions from handler"""
 	args = []
 	params = inspect.signature(fn).parameters # a mappingproxy
 	for name, param in params.items():
@@ -80,6 +81,7 @@ class RequestHandler(object):
 		self._required_kw_args = get_required_kw_args(fn)
 
 	async def __call__(self, request):
+		# Request type: <class 'aiohttp.web_request.Request'>
 		kw = None
 		if self._has_var_kw_arg or self._has_named_kw_args or self._required_kw_args:
 			if request.method == 'POST':
@@ -97,7 +99,7 @@ class RequestHandler(object):
 				else:
 					return web.HTPPBadRequest(f'Unsupported Content-Type:{request.content_type}')
 			if request.method == 'GET':
-				qs = requeset.query_string
+				qs = request.query_string
 				if qs:
 					kw = dict()
 					for k, v in parse.parse_qs(qs, True).items():

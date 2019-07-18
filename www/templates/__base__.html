@@ -28,7 +28,7 @@
                             <ul class="uk-nav uk-navbar-dropdown-nav">
                                 <li class="uk-active"><a href="#">Active</a></li>
                                 <li><a href="#">Item</a></li>
-                                <li><a href="#">Item</a>comments</li>
+                                <li><a href="#">Item</a></li>
                             </ul>
                         </div>
                     </li>
@@ -37,14 +37,15 @@
                 <div class="uk-navbar-right uk-margin-xlarge-left">
                     <ul class="uk-navbar-nav">
                     {% if __user__ %}
-                        <li class="uk-parent" >
-                            <a href="#0"><span uk-icon="user"></span>{{__user.name__}}</a>
-                            <div class="uk-dropdown uk-dropdown-nav">
-                                <ul class="uk-nav uk-nav-navbar">
-                                    <li><a href="/signout"><span uk-icon="sign-out"></span>Sign Out</a></li>
-                                </ul>
-                            </div>
+                        <li>
+                            <a href="#0"><span uk-icon="user"></span>{{__user__.name}}</a></li>
+                        {% if __user__.admin %}
+                        <li>
+                            <a href="/manage/blogs">Manage</a>
                         </li>
+                        {% endif %}
+                        <li>
+                            <a href="/signout"><span uk-icon="sign-out"></span>Sign Out</a></li>
                     {% else %}
                         <li><a href="/signin"><span uk-icon="sign-in"></span>Sign In</a></li>
                         <li><a href="/register"><span uk-icon="pencil"></span>Sign Up</a></li>

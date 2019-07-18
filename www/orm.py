@@ -175,7 +175,7 @@ class Model(dict, metaclass=ModelMetaclass): # Model = Table
 				sql.append('?')
 				sql.append(limit)
 			elif isinstance(limit, tuple) and len(limit)==2:
-				sql.append('?','?')
+				sql.append('?, ?')
 				args.extend(limit)
 			else:
 				raise ValueError(f'Invalid limit value:{str(limit)}')
