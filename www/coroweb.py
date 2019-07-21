@@ -125,7 +125,7 @@ class RequestHandler(object):
 		if self._required_kw_args:
 			for name in self._required_kw_args:
 				if not name in kw:
-					return web.HTTPBadRequest(f'Missing argument: {name}')
+					return web.HTTPBadRequest(text=f"Missing argument: {name}")
 		logging.info(f'call with args: {str(kw)}')
 		try:
 			r = await self._func(**kw) # index(**kw)

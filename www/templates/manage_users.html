@@ -1,0 +1,115 @@
+{% extends '__base__.html' %}
+
+{% block title %}Comments{% endblock %}
+
+{% block beforehead%}
+
+<script>
+	function initVM(data){
+		$('#vm').show();
+		var vm = new Vue({
+			el: '#vm',
+			data: {
+				users: data.users,
+				page: data.page
+			},
+			methods: {
+				gotoFirstPage: function(){
+					gotoPage(1);
+				},
+				gotoLastPage: function(){
+					gotoPage(this.page.page_count);
+				},
+				previous: function(){
+					gotoPage(this.page.page_index - 1);
+				},
+				next: function(){
+					gotoPage(this.page.page_index + 1);
+				},
+				delete_user: function(user){
+					if (confirm('Are you sure to delete the user\"' + user.name + '\"?')){
+						postJSON('/api/users/' + user.id + '/delete', function(err, r){
+							if (err){
+								return error(err);
+							}
+							refresh();
+						});
+					}
+				}
+			}
+		});
+	}
+
+$(function(){
+	getJSON('/api/users',{
+		page: {{page_index}}
+	},function(err,results){
+		if(err){
+			return fatal(err);
+		}
+		$('#loading').hide();
+		initVM(results);
+	});
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+<div class="uk-width-1-1 uk-margin-bottom">
+	<ul class="uk-breadcrumb">
+		<li><a href="/manage/comments">Comment</a></li>
+		<li><a href="/manage/blogs">Blogs</a></li>
+		<li class="uk-active"><span>Users</span></li>
+	</ul>
+</div>
+
+<div id="error" class="uk-width-1-1"></div>
+
+<div id="loading" class="uk-width-1-1 uk-text-center">
+	<span><i uk-spinner></i> Loading...</span>
+</div>
+
+<div id="vm" class="uk-width-1-1">
+	<table class="uk-table uk-table-justify uk-table-modifier">
+		<thead>
+			<tr>
+				<th class="uk-text-left uk-width-small">Name</th>
+				<th class="uk-text-left">Email</th>
+				<th class="uk-text-left uk-table-expand">Registered at</th>
+				<th class="uk-text-left uk-width-small">Operation</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr v-for="user in users">
+				<td>
+					<span v-if="user.admin" style="color: #e91">Administrator</span>
+					<span v-else v-text="user.name"></span>
+				</td>
+				<td>
+					<a v-bind:href="'mailto:'+user.email" v-text="user.email"></a>
+				</td>
+				<td>
+					<span v-text="user.created_at.toDateTime()"></span>
+				</td>
+				<td>
+					<a href="#0" v-on:click="delete_user(user)" style="color: #d04">Delete</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="uk-width-1-1 uk-text-center">
+			<ul class="uk-pagination">
+				<li><a v-on:click="gotoFirstPage()"><i uk-icon="chevron-double-left"></i></a></li>
+				<li v-if="! page.has_previous" class="uk-disabled"><span><i uk-icon="chevron-left"></i></span> </li>
+				<li v-else><a v-on:click="previous()" href="#0"><i uk-icon="chevron-left"></i></a></li>
+				<li class="uk-active"><span v-text="page.page_index"></span></li>
+				<li v-if="! page.has_next" class="uk-disabled"><span><i uk-icon="chevron-right"></i></span></li>
+				<li v-else><a v-on:click="next()" href="#0"><i uk-icon="chevron-right"></i></a></li>
+				<li><a v-on:click="gotoLastPage()"><i uk-icon="chevron-double-right"></i></a></li>
+			</ul>
+	</div>
+	
+</div>
+
+{% endblock %}

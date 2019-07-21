@@ -6,8 +6,8 @@
 
 <script>
 var
-	ID = '{{ID}}'
-	action = '{{ action }}'
+	ID = '{{id}}',
+	action = '{{ action }}';
 
 function initVM(blog){
 	var vm = new Vue({
@@ -28,11 +28,14 @@ function initVM(blog){
 			}
 		}
 	});
+	console.log('vm.data',vm.data);
 	$('#vm').show();
+	//$('#vm').find('input').val(vm.blog.summary);
 }
 
 
 $(function () {
+	console.log('ID=',ID);
     if (ID) {
         getJSON('/api/blogs/' + ID, function (err, blog) {
             if (err) {
@@ -80,19 +83,19 @@ $(function () {
 		<div class="uk-margin-top">
 			<label class="uk-form-label">Title:</label>
 			<div class="uk-form-controls">
-				<input class="uk-input uk-form-width-large" v-model="name" name="name" type="text" placeholder="Title" >
+				<input class="uk-input uk-form-width-large" v-model="name" name="name" type="text">
 			</div>
 		</div>
 		<div class="uk-margin-top">
 			<label class="uk-form-label">Abstract:</label>
 			<div class="uk-form-controls">
-				<textarea class="uk-textarea" v-model="summary" name="summary" rows="4" placeholder="Abstract"  style="resize: none;"></textarea>
+				<textarea class="uk-textarea" v-model="summary" name="summary" rows="4" style="resize: none;"></textarea>
 			</div>
 		</div>
 		<div class="uk-margin-top">
 			<label class="uk-form-label">Content:</label>
 			<div class="uk-form-controls">
-				<textarea class="uk-textarea" v-model="content" name="content" rows="12" placeholder="Content" style="resize: none;"></textarea>
+				<textarea class="uk-textarea" v-model="content" name="content" rows="12" style="resize: none;"></textarea>
 			</div>
 		</div>
 		<div class="uk-margin-top">

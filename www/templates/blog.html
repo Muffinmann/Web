@@ -5,7 +5,7 @@
 {% block beforehead %}
 
 <script>
-var comment_url = '/api/blogs/{{blog.id}}comments';
+var comment_url = '/api/blogs/{{blog.id}}/comments';
 
 $(function(){
 	var $form = $('#form-comment');
@@ -15,8 +15,8 @@ $(function(){
 		var content = $form.find('textarea').val().trim();
 		if (content===''){
 			return $form.showFormError('Comments can not be empty!');
-		}
-		$form.postJSON(comment_url,{content: content}, function(err, result){
+		};
+		$form.postJSON(comment_url, {content: content}, function(err, result){
 			if (err){
 				return $form.showFormError(err);
 			}
@@ -34,28 +34,57 @@ $(function(){
 		<article class="uk-article">
 			<h2>{{ blog.name }}</h2>
 			<p class="uk-article-meta">posted at {{ blog.created_at|datetime }}</p>
-			<p>{{ blog.html_content|safe }} test content</p>
+			<p>{{ blog.html_content|safe }}</p>
 		</article>
+
 		<hr>
 
 	{% if __user__ %}
 		<h3>Leave a Comment</h3>
 		<article class="uk-comment">
-			<form id="form-comment" class="uk-form">
-				<fieldset class="uk-fieldset">
-					<div class="uk-alert uk-alert-danger uk-hidden"></div>
-					<div class="uk-margin uk-form-controls">
-						<textarea class="uk-textarea" rows="4" cols="50" placeholder="your comments here" ></textarea>
-					</div>
-					<div class="uk-margin">
-						<button type="submit" class="uk-button uk-button-primary uk-button-text">commit</button>
-					</div>
-				</fieldset>
-				
-			</form>
+			<header class="uk-comment-header">
+				<img class="uk-comment-avatar" src="{{__user__.image}}" width="50" height="50">
+				<h4 class="uk-comment-title">{{__user__.name}}</h4>
+			</header>
+			<div class="uk-comment-body">
+				<form id="form-comment" class="uk-form">
+					<fieldset class="uk-fieldset">
+						<div class="uk-alert uk-alert-danger uk-hidden"></div>
+						<div class="uk-margin uk-form-controls">
+							<textarea class="uk-textarea" rows="4" cols="50" placeholder="your comments here" ></textarea>
+						</div>
+						<div class="uk-margin">
+							<button type="submit" class="uk-button uk-button-primary uk-button-text">Commit</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
 		</article>
+
+		<hr>
+
 	{% endif %}
+		<h3>Latest comments</h3>
+		<ul class="uk-comment-list">
+		{% for comment in comments%}
+		<li>
+			<article class="uk-comment">
+				<header class="uk-comment-header">
+					<img class="uk-comment-avatar uk-border-circle" width="50" height="50" src="{{comment.user_image}}">
+					<h4 class="uk-comment-title">{{ comment.user_name }} {% if comment.user_id==blog.user_id %}(Author){% endif %}</h4>
+					<p class="uk-comment-meta">{{ comment.created_at|datetime }}</p>
+				</header>
+				<div class="uk-comment-body">
+					{{ comment.html_content|safe }}
+				</div>
+			</article>
+		</li>
+		{% else %}
+		<p>No comments yet...</p>
+		{% endfor %}
+		</ul>
 	</div>
+
 </div>
 
 {% endblock %}

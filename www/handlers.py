@@ -96,7 +96,7 @@ async def index(request,*, page='1'):
 	}
 
 @get('/blog/{id}')
-async def get_blog(request, *, id): 
+async def get_blog(id): 
 	blog = await Blog.find(id)
 	comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
 	for c in comments:
@@ -105,8 +105,7 @@ async def get_blog(request, *, id):
 	return{
 	'__template__': 'blog.html',
 	'blog':blog,
-	'comments': comments,
-	'__user__': request.__user__
+	'comments': comments
 	}
 
 @get('/register')
@@ -221,7 +220,7 @@ async def api_register_user(*, email, name, passwd):
 	return r
 
 @get('/api/users')
-async def api_get_users():
+async def api_get_users(*, page='1'):
 	page_index = get_page_index(page)
 	num = await User.findNumber('count(id)')
 	p = Page(num, page_index)
@@ -230,7 +229,7 @@ async def api_get_users():
 	users = await User.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
 	for u in users:
 		u.passwd = '******'
-	return dict(users=users)
+	return dict(page=p,users=users) 
 
 @post('/api/blogs')
 async def api_create_blog(request, *, name, summary, content):
@@ -266,13 +265,20 @@ async def api_update_blog(id, request, *, name, summary, content):
 	await blog.update()
 	return blog
 
+@post('/api/blogs/{id}/delete')
+async def api_delete_blogs(request, *, id):
+	check_admin(request)
+	blog = await Blog.find(id)
+	await blog.remove()
+	return dict(id=id)
+
 @post('/api/users/{id}/delete')
-async def api_delete_users(id, request):
+async def api_delete_users(request, *, id):
 	check_admin(request)
 	id_buff = id
 	user = await User.find(id)
 	if user is None:
-		raise APIResourceNotFoundError('Comment')
+		raise APIResourceNotFoundError('user')
 	await user.remove()
 	comments = await Comment.findAll('user_id=?',[id])
 	if comments:
@@ -293,6 +299,15 @@ async def api_comments(*, page='1'):
 		return dict(page=p, comments=())
 	comments = await Comment.findAll(orderBy='created_at desc',limit=(p.offset, p.limit))
 	return dict(page=p, comments=comments)
+
+@post('/api/comments/{id}/delete')
+async def api_delete_comments(request, *, id):
+	check_admin(request)
+	c = await Comment.find(id)
+	if c is None:
+		raise APIResourceNotFoundError('Comment')
+	await c.remove()
+	return dict(id=id)
 
 @post('/api/blogs/{id}/comments')
 async def api_create_comment(id, request, *, content):
@@ -318,7 +333,7 @@ async def api_blogs(*, page='1'):
 	blogs = await Blog.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
 	return dict(page=p, blogs=blogs)
 
-@get('/api/blogs{id}')
+@get('/api/blogs/{id}')
 async def api_get_blog(*, id):
 	blog = await Blog.find(id)
 	return blog
