@@ -83,20 +83,20 @@ def text2html(text):
 async def index(request,*, page='1'):
 	page_index = get_page_index(page)
 	num = await Blog.findNumber('count(id)')
-	p = Page(num, page_index)
+	p = Page(num, page_index, 4)
 	if num == 0:
 		blogs = []
 	else:
 		blogs = await Blog.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
 	return{
-		'__template__': 'blogs.html',
+		'__template__': 'index.html',  
 		'page': p,
 		'blogs': blogs,
 		'__user__': request.__user__
 	}
 
 @get('/blog/{id}')
-async def get_blog(id): 
+async def get_blog(request, *, id): 
 	blog = await Blog.find(id)
 	comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
 	for c in comments:
@@ -105,7 +105,19 @@ async def get_blog(id):
 	return{
 	'__template__': 'blog.html',
 	'blog':blog,
-	'comments': comments
+	'comments': comments,
+	'__user__':request.__user__
+	}
+@get('/elements')
+def elements():
+	return{
+		'__template__': 'elements.html'
+	}
+
+@get('/generic')
+def generic():
+	return{
+		'__template__': 'generic.html'
 	}
 
 @get('/register')

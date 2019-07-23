@@ -29,15 +29,19 @@ $(function(){
 {% endblock %}
 
 {% block content %}
-<div class="uk-grid">
-	<div class="uk-width-1-1">
-		<article class="uk-article">
-			<h2>{{ blog.name }}</h2>
-			<p class="uk-article-meta">posted at {{ blog.created_at|datetime }}</p>
+<article id="main">
+	<header>
+		<h2>{{ blog.name }}</h2>
+		<p class="uk-article-meta">posted at {{ blog.created_at|datetime }}</p>
+	</header>
+	<section class="wrapper style5">
+		<div class="inner">
 			<p>{{ blog.html_content|safe }}</p>
-		</article>
-
-		<hr>
+			<hr>
+		</div>
+	</section>
+</article>
+<hr>
 
 	{% if __user__ %}
 		<h3>Leave a Comment</h3>

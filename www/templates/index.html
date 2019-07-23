@@ -1,0 +1,96 @@
+{% extends '__base__.html' %}
+
+{% block title %} Home - FM22 {% endblock %}
+
+{% block content%}
+<!-- Banner --> 
+<section id="banner">
+	<div class="inner">
+		<h2>FM22</h2>
+		<p>Radio waves from somewhere on this blue planet...
+		</p>
+		<!--
+		<ul class="actions special">
+			<li><a href="#" class="button primary">Activate</a></li>
+		</ul> -->
+	</div>
+	<a href="#one" class="more scrolly">Learn More</a>
+</section>
+
+
+<!-- One -->
+<section id="one" class="wrapper style2 special">
+	<div class="inner">
+		<header class="major">
+			<h2>latest blogs</h2>
+		</header>
+	</div>
+</section>
+
+<!-- Two -->
+
+<section id="two">
+	{% for blog in blogs %}
+	<section class="spotlight">
+		<div class="image"><img src="/static/images/{{blog.name}}.jpg" alt="" /></div>
+		<div class="content">
+	        <h2><a href="/blog/{{ blog.id }}">{{ blog.name }}</a></h2>
+	        <p class="uk-article-meta">posted at {{ blog.created_at|datetime }}</p>
+	        <p>{{ blog.summary }}</p>
+	        <p><a href="/blog/{{ blog.id }}">Continue Reading<i class="uk-icon-angle-double-right"></i></a></p>
+		</div>
+
+	</section>
+	{% endfor %}
+</section>
+
+
+<!-- Three -->
+<section id="three" class="wrapper style3 special">
+	<div class="inner">
+		<header class="major">
+			<h2>The World From My Eyes</h2>
+		</header>
+		<ul class="features">
+			<li class="icon fa-paper-plane">
+				<a href="#one">
+				<h3>Love, Life and Belief</h3>
+				<p>They say, the same flower that smiles today, tomorrow will be dying</p>
+				</a>
+			</li>
+			<li class="icon solid fa-laptop">
+				<a href="#one">
+				<h3>Sci&Tech</h3>
+				<p>Knowledge is power</br>      --France is Bacon</p>
+				</a>
+			</li>
+			<li class="icon solid fa-headphones-alt">
+				<a href="#one">
+				<h3>Dream Big</h3>
+				<p>Go riding a rock</p>
+				</a>
+			</li>
+			<li class="icon fa-heart">
+				<a href="#one">
+				<h3>About Me</h3>
+				<p>If you care</p>
+				</a>
+			</li>
+
+		</ul>
+	</div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="wrapper style4">
+	<div class="inner">
+		<ul class="actions stacked">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+	</div>
+</section>
+
+{% endblock %}

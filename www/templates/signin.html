@@ -1,6 +1,6 @@
 {% extends '__base__.html' %}
 
-{% block title %}Sigh In{% endblock %}
+{% block title %}Sign In{% endblock %}
 
 {% block beforehead %}
 
@@ -35,29 +35,25 @@ $(function(){
 {% endblock %}
 
 {% block content %}
-<div class="uk-grid">
-<div class="uk-width-1-1">
+<section>
 	<h4>WELCOME TO SIGN IN</h4>
-	<form id="vmAuth" v-on:submit="submit" class="uk-form-stacked">
+	<form id="vmAuth" v-on:submit="submit" class="row gtr-uniform">
 		<div class="uk-alert uk-alert-danger uk-hidden"></div>
 		<div class="uk-margin-top">
 			<label class="uk-form-label">EMAIL:</label>
 			<div class="uk-inline">
-				<span class="uk-form-icon" uk-icon="user"></span>
 				<input class="uk-input uk-form-width-medium" v-model="email" type="text" maxlength="50" placeholder="Your Email">
 			</div>
 		</div>
 		<div class="uk-margin-top">
 			<label class="uk-form-label">PASSWORD:</label>
 			<div class="uk-inline">
-				<span class="uk-form-icon" uk-icon="lock"></span>
 				<input class="uk-input uk-form-width-medium" v-model="passwd" type="text" maxlength="50" placeholder="Your Passowrd">
 			</div>
 		</div>
-		<div class="uk-margin-top uk-margin-left">
-			<button type="submit" class="uk-button-primary uk-button-text"><i uk-icon="sign-in"></i>SIGN IN</button>
+		<div class="col-6 col-12">
+			<button type="submit" class="button primary">SIGN IN</button>
 		</div>
 	</form>
-</div>
-</div>
+</section>
 {% endblock %}

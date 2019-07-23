@@ -56,13 +56,15 @@ $(function(){
 {% endblock %}
 
 {% block content %}
-<div class="uk-width-1-1 uk-margin-bottom">
-	<ul class="uk-breadcrumb">
-		<li><a href="/manage/comments">Comment</a></li>
-		<li><a href="/manage/blogs">Blogs</a></li>
-		<li class="uk-active"><span>Users</span></li>
-	</ul>
-</div>
+<section>
+	<h4>Manage</h4>
+	<div>
+		<ul class="actions">
+			<li><a href="/manage/comments">Comments</a></li>
+			<li><a href="/manage/blogs">Blogs</a></li>
+			<li class="active"><span>Users</span></li>
+		</ul>
+	</div>
 
 <div id="error" class="uk-width-1-1"></div>
 
@@ -71,6 +73,7 @@ $(function(){
 </div>
 
 <div id="vm" class="uk-width-1-1">
+	<hr>
 	<table class="uk-table uk-table-justify uk-table-modifier">
 		<thead>
 			<tr>
@@ -98,18 +101,22 @@ $(function(){
 			</tr>
 		</tbody>
 	</table>
-	<div class="uk-width-1-1 uk-text-center">
-			<ul class="uk-pagination">
-				<li><a v-on:click="gotoFirstPage()"><i uk-icon="chevron-double-left"></i></a></li>
-				<li v-if="! page.has_previous" class="uk-disabled"><span><i uk-icon="chevron-left"></i></span> </li>
-				<li v-else><a v-on:click="previous()" href="#0"><i uk-icon="chevron-left"></i></a></li>
+	<hr>
+	<div>
+			<ul class="actions">
+				<li><a v-on:click="gotoFirstPage()"><span class="icon solid fa-chevron-left "></span><span class="icon solid fa-chevron-left "></span></a></li>
+				<li v-if="! page.has_previous" class="disabled"><span class="icon solid fa-chevron-left"></span></li>
+				<li v-else><a v-on:click="previous()" href="#0"><span class="icon solid fa-chevron-left"></a></li>
+
 				<li class="uk-active"><span v-text="page.page_index"></span></li>
-				<li v-if="! page.has_next" class="uk-disabled"><span><i uk-icon="chevron-right"></i></span></li>
-				<li v-else><a v-on:click="next()" href="#0"><i uk-icon="chevron-right"></i></a></li>
-				<li><a v-on:click="gotoLastPage()"><i uk-icon="chevron-double-right"></i></a></li>
+
+				<li v-if="! page.has_next" class="disabled"><span class="icon solid fa-chevron-right"></i></span></li>
+				<li v-else><a v-on:click="next()" href="#0"><span class="icon solid fa-chevron-right"></span></a></li>
+				<li><a v-on:click="gotoLastPage()"><span class="icon solid fa-chevron-right"></span><span class="icon solid fa-chevron-right"></span></a></li>
 			</ul>
 	</div>
 	
 </div>
+</section>
 
 {% endblock %}
